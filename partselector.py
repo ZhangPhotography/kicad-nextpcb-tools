@@ -329,7 +329,6 @@ class PartSelectorDialog(wx.Dialog):
         prev_button = wx.Button(self.previous_next_panel, label = "Previous",size=(70, 26))
         sizer.Add(prev_button, 0, wx.ALL, 5)
 
-        # Create a font with your desired attributes (size, style, weight)
         font = wx.Font(14, wx.DEFAULT, wx.FONTSTYLE_NORMAL, wx.NORMAL)
         container = wx.Panel(self.previous_next_panel, size=(50, 24))
         self.page_label = wx.StaticText(container, label="1/20", style=wx.ALIGN_CENTER)
@@ -337,7 +336,6 @@ class PartSelectorDialog(wx.Dialog):
         container_sizer = wx.BoxSizer(wx.VERTICAL)
         container_sizer.AddStretchSpacer(1)  
         container_sizer.Add(self.page_label, 0, wx.ALIGN_CENTER) 
-        # Set the container's sizer
         container.SetSizer(container_sizer)
         sizer.Add(container, 0, wx.ALL, 5)
         next_button = wx.Button(self.previous_next_panel, label="Next",size=(70, 26))
@@ -351,7 +349,6 @@ class PartSelectorDialog(wx.Dialog):
         # self.page_label.SetLabel(f"({default_choice})")
         # sizer.Add(self.choice, 0, wx.ALL, 5)
 
-        # Set up the Sizer and adjust the layout
         self.previous_next_panel.SetSizer(sizer)
         self.Layout()
 
