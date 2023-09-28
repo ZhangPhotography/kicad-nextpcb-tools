@@ -4,6 +4,7 @@ import wx
 import requests
 import threading
 import json
+import math
 from .events import AssignPartsEvent, UpdateSetting
 from .helpers import HighResWxSize, loadBitmapScaled
 from .partdetails import PartDetailsDialog
@@ -11,6 +12,7 @@ from requests.exceptions import Timeout
 
 class PartSelectorDialog(wx.Dialog):
     def __init__(self, parent, parts):
+        wx.SizerFlags.DisableConsistencyChecks()
         wx.Dialog.__init__(
             self,
             parent,
@@ -26,6 +28,9 @@ class PartSelectorDialog(wx.Dialog):
         self.parts = parts
         #self.response_json_data = {}
         self.MPN_stockID_dict = {}
+
+        self.current_page = 0
+        self.total_pages = 0
 
         part_selection = self.get_existing_selection(parts)
         #self.logger.debug(part_selection)
@@ -316,6 +321,46 @@ class PartSelectorDialog(wx.Dialog):
         table_sizer.Add(self.part_list, 20, wx.ALL | wx.EXPAND, 5)
 
         # ---------------------------------------------------------------------
+        # ------------------------Previous and Next page -------------------------
+        # ---------------------------------------------------------------------
+        self.previous_next_panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.HORIZONTAL )
+
+        prev_button = wx.Button(self.previous_next_panel, label = "Previous",size=(70, 26))
+        sizer.Add(prev_button, 0, wx.ALL, 5)
+
+        # Create a font with your desired attributes (size, style, weight)
+        font = wx.Font(14, wx.DEFAULT, wx.FONTSTYLE_NORMAL, wx.NORMAL)
+        container = wx.Panel(self.previous_next_panel, size=(50, 24))
+        self.page_label = wx.StaticText(container, label="1/20", style=wx.ALIGN_CENTER)
+        self.page_label.SetFont(font)
+        container_sizer = wx.BoxSizer(wx.VERTICAL)
+        container_sizer.AddStretchSpacer(1)  
+        container_sizer.Add(self.page_label, 0, wx.ALIGN_CENTER) 
+        # Set the container's sizer
+        container.SetSizer(container_sizer)
+        sizer.Add(container, 0, wx.ALL, 5)
+        next_button = wx.Button(self.previous_next_panel, label="Next",size=(70, 26))
+        sizer.Add(next_button, 0, wx.ALL, 5)
+
+        # #Create a drop-down list control
+        # choices = ["100", "200", "300"]
+        # self.choice = wx.Choice(self.previous_next_panel, choices=choices)
+        # default_choice = "100"
+        # self.choice.SetStringSelection(default_choice)
+        # self.page_label.SetLabel(f"({default_choice})")
+        # sizer.Add(self.choice, 0, wx.ALL, 5)
+
+        # Set up the Sizer and adjust the layout
+        self.previous_next_panel.SetSizer(sizer)
+        self.Layout()
+
+        prev_button.Bind(wx.EVT_BUTTON, self.on_prev_page)
+        next_button.Bind(wx.EVT_BUTTON, self.on_next_page)
+        self.update_page_label()
+
+
+        # ---------------------------------------------------------------------
         # ------------------------ down toolbar -------------------------
         # ---------------------------------------------------------------------
 
@@ -347,6 +392,8 @@ class PartSelectorDialog(wx.Dialog):
         )
 
         tool_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        tool_sizer.AddStretchSpacer()
+        tool_sizer.Add(self.previous_next_panel, 0, wx.ALL | wx.ALIGN_BOTTOM | wx.EXPAND, 5)
         tool_sizer.AddStretchSpacer()
         tool_sizer.Add(self.select_part_button, 0, wx.ALL | wx.ALIGN_BOTTOM | wx.EXPAND, 5)
         tool_sizer.Add(self.part_details_button, 0, wx.ALL | wx.ALIGN_BOTTOM | wx.EXPAND, 5)
@@ -419,7 +466,10 @@ class PartSelectorDialog(wx.Dialog):
         ]:
             if word:
                 search_keyword += str(word + " ")
-        self.page = 1    
+        if self.current_page == 0:
+            self.page = 1 
+        else:
+            self.page = self.current_page
         body = {
             "keyword": search_keyword,
             "limit": 150,
@@ -428,9 +478,10 @@ class PartSelectorDialog(wx.Dialog):
             "supplierSort": []
         }
         
-        url = "https://edaapi.nextpcb.com/edapluginsapi/v1/stock/search"
+        url = "http://127.0.0.1:10000/edapluginsapi/v1/stock/search"
         self.search_button.Disable()
         try:
+            #wx.MessageBox(f"explain：{self.search_api_request(url, body)}", "Help", style=wx.ICON_INFORMATION)
             threading.Thread(target=self.search_api_request(url, body)).start()
         finally:
             wx.EndBusyCursor()
@@ -451,13 +502,16 @@ class PartSelectorDialog(wx.Dialog):
                 data=body_json,
                 timeout=10
             )
+            
         except Timeout:
+
             self.report_part_search_error("HTTP response timeout")
 
         if response.status_code != 200:
             self.report_part_search_error("non-OK HTTP response status")
             return
         data = response.json()
+        #wx.MessageBox(f"data{data}", "Help", style=wx.ICON_INFORMATION)
         if not data.get("result", {}):
             self.report_part_search_error(
                 "returned JSON data does not have expected 'result' attribute"
@@ -490,10 +544,14 @@ class PartSelectorDialog(wx.Dialog):
         self.MPN_stockID_dict.clear()
         if self.search_part_list is None:
             return
-        if self.total_num >= 1000:
-            self.result_count.SetLabel("1000 Results (limited)")
-        else:
-            self.result_count.SetLabel(f"{self.total_num} Results")
+        
+        self.total_pages =  math.ceil(self.total_num / 100)
+        self.update_page_label()
+        self.result_count.SetLabel(f"{self.total_num} Results")
+        # if self.total_num >= 1000:
+        #     self.result_count.SetLabel("1000 Results (limited)")
+        # else:
+        #     self.result_count.SetLabel(f"{self.total_num} Results")
 
         parameters = [
             "goodsName",
@@ -508,7 +566,7 @@ class PartSelectorDialog(wx.Dialog):
             # if idx > 50 :
                 # break
             part = []
-            #wx.MessageBox(f"partinfo{part_info}", "Help", style=wx.ICON_INFORMATION)
+            wx.MessageBox(f"partinfo{part_info}", "Help", style=wx.ICON_INFORMATION)
             for k in parameters:
                 #wx.MessageBox(f"k{k}", "Help", style=wx.ICON_INFORMATION)
                 val = part_info.get(k, "")
@@ -623,3 +681,24 @@ class PartSelectorDialog(wx.Dialog):
         wx.CallAfter(wx.EndBusyCursor)
         wx.CallAfter(self.search_button.Enable())
         return
+    
+
+    def on_prev_page(self,event):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.search(None)
+            self.update_page_label()
+
+    def on_next_page(self, event):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.search(None)
+            self.update_page_label()        
+
+
+    def update_page_label(self):
+        self.page_label.SetLabel(f"{self.current_page}/{self.total_pages}")
+   
+    # def on_choice(self, event):
+    #     selected_item = self.choice.GetStringSelection()
+    #     #wx.MessageBox(f"You selected: {selected_item}", "Selection", wx.OK | wx.ICON_INFORMATION)
