@@ -475,7 +475,7 @@ class PartSelectorDialog(wx.Dialog):
             "supplierSort": []
         }
         
-        url = "http://127.0.0.1:10000/edapluginsapi/v1/stock/search"
+        url = "https://edaapi.nextpcb.com/edapluginsapi/v1/stock/search"
         self.search_button.Disable()
         try:
             #wx.MessageBox(f"explain：{self.search_api_request(url, body)}", "Help", style=wx.ICON_INFORMATION)
@@ -563,7 +563,7 @@ class PartSelectorDialog(wx.Dialog):
             # if idx > 50 :
                 # break
             part = []
-            wx.MessageBox(f"partinfo{part_info}", "Help", style=wx.ICON_INFORMATION)
+            #wx.MessageBox(f"partinfo{part_info}", "Help", style=wx.ICON_INFORMATION)
             for k in parameters:
                 #wx.MessageBox(f"k{k}", "Help", style=wx.ICON_INFORMATION)
                 val = part_info.get(k, "")
