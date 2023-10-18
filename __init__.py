@@ -1,22 +1,19 @@
-# import logging
-# import os
+import sys
+import os
 
-from .plugin import JLCPCBPlugin
+try:
+    PLUGIN_ROOT =os.path.dirname(os.path.abspath(__file__))
+    if PLUGIN_ROOT not in sys.path:
+            sys.path.append(PLUGIN_ROOT)
+    from kicad_nextpcb_new.plugin import JLCPCBPlugin
+    JLCPCBPlugin().register()
+except Exception as e:
+    import logging
+    logger = logging.getLogger()
+    logger.debug(repr(e))
 
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format="%(asctime)s [%(levelname)s] %(message)s",
-#     handlers=[
-#         logging.FileHandler(
-#             os.path.join(os.path.dirname(os.path.realpath(__file__)), "debug.log")
-#         ),
-#         logging.StreamHandler(),
-#     ],
-# )
+# from kicad_nextpcb_new.plugin import JLCPCBPlugin
 
-# LOGGER = logging.getLogger()
-
-# try:
-JLCPCBPlugin().register()
-# except Exception as e:
-# LOGGER.debug(repr(e))
+# JLCPCBPlugin().register()
+# # except Exception as e:
+# # LOGGER.debug(repr(e))
