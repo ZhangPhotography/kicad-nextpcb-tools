@@ -310,27 +310,6 @@ class NextPCBTools(wx.Dialog):
         # ---------------------------------------------------------------------
         # --------------------- Bottom Logbox and Gauge -----------------------
         # ---------------------------------------------------------------------
-        
-        
-        self.logbox = wx.TextCtrl(
-            self,
-            wx.ID_ANY,
-            wx.EmptyString,
-            wx.DefaultPosition,
-            wx.DefaultSize,
-            wx.TE_MULTILINE | wx.TE_READONLY,
-        )
-        self.logbox.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 150)))
-        self.gauge = wx.Gauge(
-            self,
-            wx.ID_ANY,
-            100,
-            wx.DefaultPosition,
-            HighResWxSize(self.window, wx.Size(100, -1)),
-            wx.GA_HORIZONTAL,
-        )
-        self.gauge.SetValue(0)
-        self.gauge.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 5)))
 
         self.assigned_part = wx.BoxSizer(wx.VERTICAL)
         self.assigned_part.SetMinSize(wx.Size(-1,200))
@@ -345,10 +324,7 @@ class NextPCBTools(wx.Dialog):
         layout = wx.BoxSizer(wx.VERTICAL)
         layout.Add(self.upper_toolbar, 0, wx.ALL | wx.EXPAND, 5)
         layout.Add(table_sizer, 1, wx.ALL | wx.EXPAND, 5)
-        # layout.Add( self.assigned_part, 0, wx.ALL | wx.EXPAND, 5)
-        #layout.Add(self.assigned_part_view, 0, wx.ALL | wx.EXPAND, 5)
-        layout.Add(self.logbox, 0, wx.ALL | wx.EXPAND, 5)
-        layout.Add(self.gauge, 0, wx.ALL | wx.EXPAND, 5)
+        layout.Add( self.assigned_part, 0, wx.ALL | wx.EXPAND, 5)
 
 
         self.SetSizer(layout)
@@ -381,7 +357,6 @@ class NextPCBTools(wx.Dialog):
         elif self.selected_page_index == 1:
             self.footprint_list = self.fplist_unmana
 
-        # if self.library.state == LibraryState.INITIALIZED:
         self.populate_footprint_list()
 
     def quit_dialog(self, e):
@@ -396,20 +371,11 @@ class NextPCBTools(wx.Dialog):
     def init_store(self):
         """Initialize the store of part assignments"""
         self.store = Store(self, self.project_path, BOARD_LOADED)
-        # if self.library.state == LibraryState.INITIALIZED:
         self.populate_footprint_list()
 
     def init_fabrication(self):
         """Initialize the fabrication"""
         self.fabrication = Fabrication(self, BOARD_LOADED)
-    # def reset_gauge(self, e):
-    #     """Initialize the gauge."""
-    #     self.gauge.SetRange(100)
-    #     self.gauge.SetValue(0)
-
-    # def update_gauge(self, e):
-    #     """Update the gauge"""
-    #     self.gauge.SetValue(int(e.value))
 
     def group_parts(self, e):
         """ """

@@ -1,5 +1,3 @@
-# import wx
-
 ID_GROUP = 0
 ID_AUTO_MATCH = 1
 ID_GENERATE = 2
