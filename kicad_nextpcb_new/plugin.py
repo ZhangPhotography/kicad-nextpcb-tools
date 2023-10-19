@@ -6,10 +6,10 @@ from .mainwindow import NextPCBTools
 
 class JLCPCBPlugin(ActionPlugin):
     def defaults(self):
-        self.name = "JLCPCB Tools"
+        self.name = "NextPCB Tools"
         self.category = "Fabrication data generation"
         self.description = (
-            "Generate JLCPCB-compatible Gerber, Excellon, BOM and CPL files"
+            "Generate NextPCB-compatible Gerber, Excellon, BOM and CPL files"
         )
         self.show_toolbar_button = True
         path, filename = os.path.split(os.path.abspath(__file__))

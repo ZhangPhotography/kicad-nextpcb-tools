@@ -294,13 +294,6 @@ class PartSelectorDialog(wx.Dialog):
             align=wx.ALIGN_LEFT,
             flags=wx.dataview.DATAVIEW_COL_RESIZABLE,
         )
-        # self.part_list.AppendTextColumn(
-            # "Joints",
-            # mode=wx.dataview.DATAVIEW_CELL_INERT,
-            # width=int(parent.scale_factor * 50),
-            # align=wx.ALIGN_CENTER,
-            # flags=wx.dataview.DATAVIEW_COL_RESIZABLE,
-        # )
         self.part_list.AppendTextColumn(
             "Supplier",
             mode=wx.dataview.DATAVIEW_CELL_INERT,
@@ -309,12 +302,10 @@ class PartSelectorDialog(wx.Dialog):
             flags=wx.dataview.DATAVIEW_COL_RESIZABLE,
         )
 
-        # self.part_list.SetMinSize(HighResWxSize(parent.window, wx.Size(1050, 500)))
 
         self.part_list.Bind(
             wx.dataview.EVT_DATAVIEW_COLUMN_HEADER_CLICK, self.OnSortPartList
         )
-        # self.part_list.Bind(wx.dataview.EVT_DATAVIEW_SELECTION_CHANGED, self.on_item_click)
 
         self.part_list.Bind(
             wx.dataview.EVT_DATAVIEW_SELECTION_CHANGED, self.on_part_selected
@@ -345,25 +336,21 @@ class PartSelectorDialog(wx.Dialog):
         next_button = wx.Button(self.previous_next_panel, label="Next",size=(70, 26))
         sizer.Add(next_button, 0, wx.ALL, 5)
 
-        # 创建一个下拉列表控件
-        # choices = ["100条", "200条", "300条"]
+        # #Create a drop-down list control
+        # choices = ["100", "200", "300"]
         # self.choice = wx.Choice(self.previous_next_panel, choices=choices)
-        # default_choice = "100条"
+        # default_choice = "100"
         # self.choice.SetStringSelection(default_choice)
-        # # 在标签上显示默认选择
         # self.page_label.SetLabel(f"({default_choice})")
         # sizer.Add(self.choice, 0, wx.ALL, 5)
 
-        # 设置Sizer并调整布局
+
         self.previous_next_panel.SetSizer(sizer)
         self.Layout()
 
         prev_button.Bind(wx.EVT_BUTTON, self.on_prev_page)
         next_button.Bind(wx.EVT_BUTTON, self.on_next_page)
 
-        # 初始化当前页和总页数
-        #self.current_page = 1
-        #self.total_pages = 20
         self.update_page_label()
 
 
@@ -415,9 +402,6 @@ class PartSelectorDialog(wx.Dialog):
         layout.Add( bSizer1, 1, wx.EXPAND, 5 )
         
 
-        # layout.Add(result_sizer, 0, wx.LEFT | wx.EXPAND, 5)
-        # layout.Add(table_sizer, 20, wx.ALL | wx.EXPAND, 5)
-
         self.SetSizer(layout)
         self.Layout()
         self.Centre(wx.BOTH)
@@ -464,7 +448,6 @@ class PartSelectorDialog(wx.Dialog):
     def search(self, e):
         """Search the library for parts that meet the search criteria."""
         search_keyword = ""
-        # for word in self.part_info:
         for word in [
             self.mpn_textctrl.GetValue(),
             self.manufacturer.GetValue(),
@@ -569,8 +552,6 @@ class PartSelectorDialog(wx.Dialog):
         self.item_list = []
         #wx.MessageBox(f"self.search_part_list_json{self.search_part_list}", "Help", style=wx.ICON_INFORMATION)
         for idx, part_info in enumerate(self.search_part_list, start=1):
-            # if idx > 50 :
-                # break
             part = []
             #wx.MessageBox(f"partinfo{part_info}", "Help", style=wx.ICON_INFORMATION)
             for k in parameters:
@@ -592,19 +573,10 @@ class PartSelectorDialog(wx.Dialog):
             suppliername = "-" if suppliername == "" else suppliername
             part.insert(6, suppliername)
             #wx.MessageBox(f"part:{part}", "Help", style=wx.ICON_INFORMATION)
-            #self.item_list.append(part)
             part.insert(0, f'{idx}')
             self.MPN_stockID_dict["".join(part[:4])] = part_info.get("stockId", 0)
             self.part_list.AppendItem(part)
             #wx.MessageBox(f"parts:{parts}", "Help", style=wx.ICON_INFORMATION)
-
-
-        # for idx, item in enumerate(self.item_list, start=1):
-            # item.insert(0, f'{idx}')
-            # 
-        # 
-            # self.part_list.AppendItem(item)
-        #wx.MessageBox(f"dict:{self.MPN_stockID_dict}", "Help", style=wx.ICON_INFORMATION)
 
 
 
@@ -651,10 +623,7 @@ class PartSelectorDialog(wx.Dialog):
         manu = self.part_list.GetValue(row, 2)
         des = self.part_list.GetValue(row, 3)
         key = str(row + 1) + selection + manu + des
-        # part = self.part_list.GetValue(row, 1)
         stock_id = self.MPN_stockID_dict.get(key, 0)
-
-        # stock_id = 2500335685
         # wx.MessageBox(f"stock_id:{stock_id}", "Help", style=wx.ICON_INFORMATION)
 
         if stock_id != "":
@@ -672,38 +641,6 @@ class PartSelectorDialog(wx.Dialog):
                 style=wx.ICON_ERROR,
             )
 
-    
-
-    # def get_part_details(self, e):
-    #     """Fetch part details from NextPCB API and show them in a modal."""
-    #     item = self.part_list.GetSelection()
-    #     #wx.MessageBox(f"item:{item}", "Help", style=wx.ICON_INFORMATION)
-    #     row = self.part_list.ItemToRow(item)
-    #     if row == -1:
-    #         return
-    #     selection = self.part_list.GetValue(row, 1)
-    #     manu = self.part_list.GetValue(row, 2)
-    #     des = self.part_list.GetValue(row, 3)
-    #     key = str(row + 1) + selection + manu + des
-    #     # part = self.part_list.GetValue(row, 1)
-    #     stock_id = self.MPN_stockID_dict.get(key, 0)
-
-    #     stock_id = 2500335685
-    #     wx.MessageBox(f"stock_id:{stock_id}", "Help", style=wx.ICON_INFORMATION)
-
-    #     if stock_id != "":
-    #         try:
-    #             wx.BeginBusyCursor()
-    #             #wx.MessageBox(f"stock_id:{stock_id}", "Help", style=wx.ICON_INFORMATION)
-    #             PartDetailsDialog(self.parent, int(stock_id)).ShowModal()
-    #         finally:
-    #              wx.EndBusyCursor()
-    #     else:
-    #         wx.MessageBox(
-    #             "Failed to get part stockID from NextPCB\r\n",
-    #             "Error",
-    #             style=wx.ICON_ERROR,
-    #         )
 
     def help(self, e):
         """Show message box with help instructions"""
@@ -748,7 +685,8 @@ class PartSelectorDialog(wx.Dialog):
 
     def update_page_label(self):
         self.page_label.SetLabel(f"{self.current_page}/{self.total_pages}")
-   
+    
+    # # a drop-down list control trigger event
     # def on_choice(self, event):
     #     selected_item = self.choice.GetStringSelection()
     #     #wx.MessageBox(f"You selected: {selected_item}", "Selection", wx.OK | wx.ICON_INFORMATION)

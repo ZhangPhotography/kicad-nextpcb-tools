@@ -62,11 +62,8 @@ class PartDetailsView(UiPartDetailsPanel):
         }
 
         content = requests.get(url,headers=header).content
-        #content = requests.get(url).content
         io_bytes = io.BytesIO(content)
         image = wx.Image(io_bytes, type=wx.BITMAP_TYPE_ANY)
-        # self.part_image.SetSize((width, height+20))
-        # image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
         result = wx.Bitmap(image)
         return result
 
@@ -151,14 +148,9 @@ class PartDetailsView(UiPartDetailsPanel):
         self.data_list.Bind(wx.dataview.EVT_DATAVIEW_ITEM_ACTIVATED, self.on_open_pdf)
 
         picture = self.info.get("goodsImage", [])
-        # wx.MessageBox(f"self.pdfurl{self.pdfurl}", "Help", style=wx.ICON_INFORMATION)
         #wx.MessageBox(f"picture:{picture}", "Help", style=wx.ICON_INFORMATION)
         if picture:
-            
             picture = "https:" + picture[0]
-            #webbrowser.open(picture)
-            # Print(self, str(picture)).ShowModal()
-            # wx.MessageBox(f"picture:{picture}", "Help", style=wx.ICON_INFORMATION)
             self.part_image.SetBitmap(
                 self.get_scaled_bitmap(
                     picture,

@@ -28,7 +28,6 @@ import requests
 import webbrowser
 import threading
 from pcbnew import GetBoard, GetBuildVersion, ToMM
-from pcbnew import LoadBoard
 from .events import EVT_MESSAGE_EVENT,EVT_ASSIGN_PARTS_EVENT,EVT_POPULATE_FOOTPRINT_LIST_EVENT,EVT_UPDATE_SETTING
 
 from kicad_nextpcb_new.nextpcb_tools_gui.ui_assigned_part_panel.assigned_part_view import AssignedPartView
@@ -42,27 +41,10 @@ BOARD_LOADED = load_board_manager()
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-# ID_GROUP = 0
-# ID_AUTO_MATCH = 1
-# ID_GENERATE = 2
-# ID_GENERATE_AND_PLACE_ORDER = 3
-# ID_ROTATIONS = 4
-# ID_MAPPINGS = 5
-# ID_SETTINGS = 6
-
-# ID_MANUAL_MATCH = 7
-# ID_REMOVE_PART = 8
-# ID_SELECT_SAME_PARTS = 9
-# ID_PART_DETAILS = 10
-# ID_TOGGLE_BOM = 11
-# ID_TOGGLE_POS = 12
-# ID_SAVE_MAPPINGS = 13
-# ID_EXPORT = 14
 ID_COPY_MPN = wx.NewIdRef()
 ID_PASTE_MPN = wx.NewIdRef()
 ID_CONTEXT_MENU_ADD_ROT_BY_PACKAGE = wx.NewIdRef()
 ID_CONTEXT_MENU_ADD_ROT_BY_NAME = wx.NewIdRef()
-# # ID_EXPORT_TO_SCHEMATIC = 16
 
 
 class NextPCBTools(wx.Dialog):
@@ -78,7 +60,6 @@ class NextPCBTools(wx.Dialog):
             size=wx.Size(1200, 800),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER | wx.MAXIMIZE_BOX,
         )
-
 
         
         self.KicadBuildVersion = GetBuildVersion()
@@ -103,8 +84,6 @@ class NextPCBTools(wx.Dialog):
         self.assigned_part_view = AssignedPartView(self)
         self.match_part_view =   MatchPartView(self)
         mainwindows = self
-        # self.foot_print_list=FootPrintList(self, mainwindows)
-
 
         # ---------------------------------------------------------------------
         # ---------------------------- Hotkeys --------------------------------
@@ -196,13 +175,12 @@ class NextPCBTools(wx.Dialog):
         )
 
         self.upper_toolbar.AddSeparator()
-
+        # "Manage part rotations",
         self.rotation_button = self.upper_toolbar.AddTool(
             ID_ROTATIONS,
             "",
             loadBitmapScaled("nextpcb-rotations.png", self.scale_factor),
             "Rotations"
-            # "Manage part rotations",
         )
 
 
@@ -229,9 +207,7 @@ class NextPCBTools(wx.Dialog):
         # ---------------------------------------------------------------------
         # ------------------ down toolbar List --------------------------
         # ---------------------------------------------------------------------
-        # self.match_part_vi = wx.Panel(self)
-        # match_part_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
+       
         self.down_toolbar = wx.ToolBar(
             self,
             wx.ID_ANY,
@@ -251,10 +227,7 @@ class NextPCBTools(wx.Dialog):
             ID_MANUAL_MATCH,
             "Assign MPN number to a part by manual"
         )
-        # self.select_part_button.SetDefault()
         self.down_toolbar.AddControl(self.select_part_button)
-
-        # self.down_toolbar.AddSeparator()
 
         self.remove_part_button = wx.Button(
             self.down_toolbar,
@@ -274,13 +247,6 @@ class NextPCBTools(wx.Dialog):
         self.down_toolbar.Realize()
 
 
-        # match_part_sizer.Add(self.down_toolbar, 1, wx.ALL | wx.EXPAND, 5)
-        # match_part_sizer.Add(self.export, 1, wx.ALL | wx.EXPAND, 5)
-
-        # # 将 BoxSizer 设置为 match_part_vi 的布局管理器
-        # self.match_part_vi.SetSizer(match_part_sizer)
-
-
         self.Bind(wx.EVT_BUTTON, self.select_part, self.match_part_view.select_part_button)
         self.Bind(wx.EVT_BUTTON, self.remove_part, self.match_part_view.remove_part_button)
         # self.Bind(wx.EVT_BUTTON, self.save_all_mappings, self.save_all_button)
@@ -296,7 +262,6 @@ class NextPCBTools(wx.Dialog):
             self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0)
         self.first_panel = wx.Panel(
             self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL)
-        # self.m_dataViewListCtrl10 = wx.dataview.DataViewListCtrl( self.first_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.first_panel.Layout()
         self.notebook.AddPage(self.first_panel, "All", True)
         grid_sizer1 = wx.GridSizer(0, 1, 0, 0)
@@ -331,11 +296,14 @@ class NextPCBTools(wx.Dialog):
         self.Bind(
             wx.dataview.EVT_DATAVIEW_SELECTION_CHANGED, mainwindows.OnFootprintSelected
         )
+        self.Bind(wx.dataview.EVT_DATAVIEW_SELECTION_CHANGED,
+                  mainwindows.get_part_details)
+        self.Bind(wx.dataview.EVT_DATAVIEW_ITEM_ACTIVATED,
+                  mainwindows.get_part_details)
         self.Bind(
             wx.dataview.EVT_DATAVIEW_ITEM_CONTEXT_MENU, mainwindows.OnRightDown
         )
-        self.Bind(wx.dataview.EVT_DATAVIEW_ITEM_ACTIVATED,
-                  mainwindows.get_part_details)
+
         self.Bind(wx.dataview.EVT_DATAVIEW_ITEM_VALUE_CHANGED,
                   mainwindows.toggle_update_to_db)
 
@@ -344,25 +312,25 @@ class NextPCBTools(wx.Dialog):
         # ---------------------------------------------------------------------
         
         
-        # self.logbox = wx.TextCtrl(
-        #     self,
-        #     wx.ID_ANY,
-        #     wx.EmptyString,
-        #     wx.DefaultPosition,
-        #     wx.DefaultSize,
-        #     wx.TE_MULTILINE | wx.TE_READONLY,
-        # )
-        # self.logbox.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 150)))
-        # self.gauge = wx.Gauge(
-        #     self,
-        #     wx.ID_ANY,
-        #     100,
-        #     wx.DefaultPosition,
-        #     HighResWxSize(self.window, wx.Size(100, -1)),
-        #     wx.GA_HORIZONTAL,
-        # )
-        # self.gauge.SetValue(0)
-        # self.gauge.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 5)))
+        self.logbox = wx.TextCtrl(
+            self,
+            wx.ID_ANY,
+            wx.EmptyString,
+            wx.DefaultPosition,
+            wx.DefaultSize,
+            wx.TE_MULTILINE | wx.TE_READONLY,
+        )
+        self.logbox.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 150)))
+        self.gauge = wx.Gauge(
+            self,
+            wx.ID_ANY,
+            100,
+            wx.DefaultPosition,
+            HighResWxSize(self.window, wx.Size(100, -1)),
+            wx.GA_HORIZONTAL,
+        )
+        self.gauge.SetValue(0)
+        self.gauge.SetMinSize(HighResWxSize(self.window, wx.Size(-1, 5)))
 
         self.assigned_part = wx.BoxSizer(wx.VERTICAL)
         self.assigned_part.SetMinSize(wx.Size(-1,200))
@@ -377,13 +345,11 @@ class NextPCBTools(wx.Dialog):
         layout = wx.BoxSizer(wx.VERTICAL)
         layout.Add(self.upper_toolbar, 0, wx.ALL | wx.EXPAND, 5)
         layout.Add(table_sizer, 1, wx.ALL | wx.EXPAND, 5)
-        layout.Add( self.assigned_part, 0, wx.ALL | wx.EXPAND, 5)
+        # layout.Add( self.assigned_part, 0, wx.ALL | wx.EXPAND, 5)
         #layout.Add(self.assigned_part_view, 0, wx.ALL | wx.EXPAND, 5)
-        # layout.Add(self.logbox, 0, wx.ALL | wx.EXPAND, 5)
-        
-        
-        # layout.Add(self.gauge, 0, wx.ALL | wx.EXPAND, 5)
-        # layout.Add(self.assigned_part_view, 1, wx.ALL | wx.EXPAND, 5)
+        layout.Add(self.logbox, 0, wx.ALL | wx.EXPAND, 5)
+        layout.Add(self.gauge, 0, wx.ALL | wx.EXPAND, 5)
+
 
         self.SetSizer(layout)
         self.Layout()
@@ -538,29 +504,17 @@ class NextPCBTools(wx.Dialog):
                     "Error",
                     style=wx.ICON_ERROR
                 )
-                # wx.CallAfter(wx.EndBusyCursor)
                 continue
 
             rsp_data = response.json()
             # wx.MessageBox(f"response.json():{data}", "Help", style=wx.ICON_INFORMATION)
             # wx.MessageBox(f"info:{rsp_data.get('info')}", "Help", style=wx.ICON_INFORMATION)
             if rsp_data.get("info") != "SUCCESS":
-                # wx.MessageBox(
-                # "Some parts match failed.Skip them and continue to match",
-                # "Info",
-                # style=wx.ICON_INFORMATION
-                # )
-                # wx.CallAfter(wx.EndBusyCursor)
                 continue
-
             if not rsp_data.get("data", {}).get("match", {}):
-                # wx.CallAfter(wx.EndBusyCursor)
-                # unmatch
                 continue
             match_parts = rsp_data.get("data", {}).get("match", {})
-
             if not match_parts:
-                # wx.CallAfter(wx.EndBusyCursor)
                 continue
             key_params = [
                 "ModelName",
@@ -575,18 +529,13 @@ class NextPCBTools(wx.Dialog):
                 temp_dict = {}
                 for k in key_params:
                     temp_list.append(part_info.get("match", {}).get(k, ""))
-
                 # wx.MessageBox(f"temp_list:{temp_list}", "Help", style=wx.ICON_INFORMATION)
-                # wx.MessageBox(f"part_info.get('0'):{part_info.get('0')}", "Help", style=wx.ICON_INFORMATION)
                 temp_dict[part_info.get("0")] = temp_list
                 # wx.MessageBox(f"temp_dict:{temp_dict}", "Help", style=wx.ICON_INFORMATION)
-
                 self.matched_list.append(temp_dict)
             # wx.MessageBox(f"self.matched_list:{self.matched_list}", "Help", style=wx.ICON_INFORMATION)
-
             wx.CallAfter(self.update_db_after_match)
             wx.CallAfter(self.populate_footprint_list)
-            # wx.CallAfter(wx.EndBusyCursor)
 
     def update_db_after_match(self):
         # wx.MessageBox(f"db_self.matched_list:{self.matched_list}", "Help", style=wx.ICON_INFORMATION)
@@ -782,6 +731,7 @@ class NextPCBTools(wx.Dialog):
         """Fetch part details from NextPCB and show them one after another each in a modal."""
         self.enable_toolbar_buttons(
             self.footprint_list.GetSelectedItemsCount() > 0)
+        e.Skip()
 
 
     def enable_all_buttons(self, state):
@@ -819,15 +769,12 @@ class NextPCBTools(wx.Dialog):
     def toggle_bom(self, e):
         """Toggle the exclude from BOM attribute of a footprint."""
         selected_rows = []
-        # self.logger.debug("toggle bom")
         for item in self.footprint_list.GetSelections():
             row = self.footprint_list.ItemToRow(item)
             selected_rows.append(row)
             refs = self.footprint_list.GetTextValue(row, 1).split(",")
             for ref in refs:
-                # fp = get_footprint_by_ref(BOARD_LOADED, ref)[0]
                 bom = self.footprint_list.GetValue(row, 7)
-                # wx.MessageBox(f"stockID:{bom}", "Help", style=wx.ICON_INFORMATION)
                 self.store.set_bom(ref, bom)
 
         self.populate_footprint_list()
@@ -837,13 +784,11 @@ class NextPCBTools(wx.Dialog):
     def toggle_pos(self, e):
         """Toggle the exclude from POS attribute of a footprint."""
         selected_rows = []
-        # self.logger.debug("toggle pos")
         for item in self.footprint_list.GetSelections():
             row = self.footprint_list.ItemToRow(item)
             selected_rows.append(row)
             refs = self.footprint_list.GetTextValue(row, 1).split(",")
             for ref in refs:
-                # fp = get_footprint_by_ref(BOARD_LOADED, ref)[0]
                 pos = self.footprint_list.GetValue(row, 8)
                 self.store.set_pos(ref, pos)
         self.populate_footprint_list()
@@ -859,7 +804,6 @@ class NextPCBTools(wx.Dialog):
             if mpn:
                 for iter_ref in ref.split(","):
                     if iter_ref:
-                        # get_footprint_by_ref(BOARD_LOADED, iter_ref)[0]
                         self.store.set_lcsc(iter_ref, "")
                         self.store.set_manufacturer(iter_ref, "")
                         self.store.set_description(iter_ref, "")
@@ -872,7 +816,8 @@ class NextPCBTools(wx.Dialog):
         """Select all parts that have the same value and footprint."""
         num_sel = (
             self.footprint_list.GetSelectedItemsCount()
-        )  # could have selected more than 1 item (by mistake?)
+        )  
+        # could have selected more than 1 item (by mistake?)
         if num_sel == 1:
             item = self.footprint_list.GetSelection()
         else:
@@ -898,9 +843,9 @@ class NextPCBTools(wx.Dialog):
             ref = self.footprint_list.GetTextValue(row, 1).split(",")[0]
             # wx.MessageBox(f"ref:{ref}", "Help", style=wx.ICON_INFORMATION)
             stock_id = self.store.get_stock_id(ref)
-            wx.MessageBox(f"stockID:{stock_id}", "Help", style=wx.ICON_INFORMATION)
-            # self.show_part_details_dialog(stock_id)
+            # wx.MessageBox(f"stockID:{stock_id}", "Help", style=wx.ICON_INFORMATION)
             self.assigned_part_view.get_part_data(stock_id)
+        e.Skip()
 
 
     def get_column_by_name(self, column_title_to_find):
@@ -992,15 +937,10 @@ class NextPCBTools(wx.Dialog):
             PartSelectorDialog(self, selection).ShowModal()
         finally:
             wx.EndBusyCursor()
-        # if self.manual_match_dialog is None:
-        #     self.manual_match_dialog  =  PartSelectorDialog(self, selection)
-        # self.manual_match_dialog.ShowModal()
 
     def copy_part_lcsc(self, e):
         """Fetch part details from LCSC and show them in a modal."""
         # wx.MessageBox("copyslot", "Help", style=wx.ICON_INFORMATION)
-        # if self.footprint_list.GetSelections() > 1:
-        # return
 
         item = self.footprint_list.GetSelection()
         row = self.footprint_list.ItemToRow(item)
@@ -1013,15 +953,12 @@ class NextPCBTools(wx.Dialog):
         ref = self.footprint_list.GetTextValue(row, 1).split(",")[0]
         part += str(self.store.get_stock_id(ref))
 
-        # wx.MessageBox(f"copy text part:{part}", "Help", style=wx.ICON_INFORMATION)
-
         if part != "":
             if wx.TheClipboard.Open():
                 wx.TheClipboard.SetData(wx.TextDataObject(part))
                 wx.TheClipboard.Close()
 
     def paste_part_lcsc(self, e):
-        # wx.MessageBox("copyslot", "Help", style=wx.ICON_INFORMATION)
         text_data = wx.TextDataObject()
         if wx.TheClipboard.Open():
             success = wx.TheClipboard.GetData(text_data)
@@ -1150,7 +1087,6 @@ class NextPCBTools(wx.Dialog):
         part_detail = wx.MenuItem(
             conMenu, ID_PART_DETAILS, "Show Part Details")
         conMenu.Append(part_detail)
-        # conMenu.Bind(wx.EVT_MENU, self.get_part_details, part_detail)
 
         item_count = len(self.footprint_list.GetSelections())
         if item_count > 1:
@@ -1176,7 +1112,8 @@ class NextPCBTools(wx.Dialog):
             ):
                 conMenu.Enable(menu_item, state)
         self.footprint_list.PopupMenu(conMenu)
-        conMenu.Destroy()  # destroy to avoid memory leak
+        # destroy to avoid memory leak
+        conMenu.Destroy()  
 
     def toggle_update_to_db(self, e):
         col = e.GetColumn()
@@ -1195,17 +1132,12 @@ class NextPCBTools(wx.Dialog):
         # Log to stderr
         handler1 = logging.StreamHandler(sys.stderr)
         handler1.setLevel(logging.DEBUG)
-        # and to our GUI
-        # handler2 = LogBoxHandler(self.logbox)
-        # handler2.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(funcName)s -  %(message)s",
             datefmt="%Y.%m.%d %H:%M:%S",
         )
         handler1.setFormatter(formatter)
-        # handler2.setFormatter(formatter)
         root.addHandler(handler1)
-        # root.addHandler(handler2)
         self.logger = logging.getLogger(__name__)
 
     def __del__(self):
