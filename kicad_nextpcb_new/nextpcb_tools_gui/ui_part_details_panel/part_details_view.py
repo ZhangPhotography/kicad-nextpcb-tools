@@ -154,8 +154,6 @@ class PartDetailsView(UiPartDetailsPanel):
             self.part_image.SetBitmap(
                 self.get_scaled_bitmap(
                     picture,
-                    # 320,
-                    # 300,
                 )
             )
         self.Layout()

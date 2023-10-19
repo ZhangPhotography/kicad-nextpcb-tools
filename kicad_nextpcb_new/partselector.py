@@ -7,7 +7,6 @@ import json
 import math
 from .events import AssignPartsEvent, UpdateSetting
 from .helpers import HighResWxSize, loadBitmapScaled
-# from .partdetails import PartDetailsDialog
 from requests.exceptions import Timeout
 from kicad_nextpcb_new.nextpcb_tools_gui.ui_part_details_panel.part_details_view import PartDetailsView
 
@@ -27,16 +26,13 @@ class PartSelectorDialog(wx.Dialog):
         self.logger = logging.getLogger(__name__)
         self.parent = parent
         self.parts = parts
-        #self.response_json_data = {}
         self.MPN_stockID_dict = {}
 
         self.current_page = 0
         self.total_pages = 0
 
         part_selection = self.get_existing_selection(parts)
-        #self.logger.debug(part_selection)
         self.part_info = part_selection.split(",")
-        #self.logger.debug(part_info)
 
         self.part_details_view = PartDetailsView(self)
         # ---------------------------------------------------------------------
@@ -120,22 +116,6 @@ class PartSelectorDialog(wx.Dialog):
         )
         self.package.SetHint("e.g. 0806")
 
-        # self.assert_stock_checkbox = wx.CheckBox(
-            # self,
-            # wx.ID_ANY,
-            # "In Stock",
-            # wx.DefaultPosition,
-            # HighResWxSize(parent.window, wx.Size(80, 30)),
-            # 0,
-            # name="stock",
-        # )
-
-        # self.assert_stock_checkbox.SetValue(
-            # True
-            # self.parent.settings.get("partselector", {}).get("stock", True)
-        # )
-
-        # self.assert_stock_checkbox.Bind(wx.EVT_CHECKBOX, self.upadate_settings)
 
         self.search_button = wx.Button(
             self,
@@ -201,12 +181,6 @@ class PartSelectorDialog(wx.Dialog):
         search_sizer.Add(search_sizer_three, 0, wx.RIGHT, 20)
         search_sizer.Add(search_sizer_four, 0, wx.RIGHT, 20)
         search_sizer.AddStretchSpacer()
-        # search_sizer.Add(
-            # self.assert_stock_checkbox,
-            # 0,
-            # wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL,
-            # 5,
-        # )
         search_sizer.Add(
             self.search_button,
             0,
@@ -220,7 +194,6 @@ class PartSelectorDialog(wx.Dialog):
         self.description.Bind(wx.EVT_TEXT_ENTER, self.search)
         self.package.Bind(wx.EVT_TEXT_ENTER, self.search)
         self.search_button.Bind(wx.EVT_BUTTON, self.search)
-        # help_button.Bind(wx.EVT_BUTTON, self.help)
 
         # ---------------------------------------------------------------------
         # ------------------------ Result status line -------------------------
@@ -630,7 +603,6 @@ class PartSelectorDialog(wx.Dialog):
             try:
                 wx.BeginBusyCursor()
                 #wx.MessageBox(f"stock_id:{stock_id}", "Help", style=wx.ICON_INFORMATION)
-                # PartDetailsDialog(self.parent, int(stock_id)).ShowModal()
                 self.part_details_view.get_part_data(stock_id)
             finally:
                  wx.EndBusyCursor()

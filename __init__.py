@@ -11,9 +11,3 @@ except Exception as e:
     import logging
     logger = logging.getLogger()
     logger.debug(repr(e))
-
-# from kicad_nextpcb_new.plugin import JLCPCBPlugin
-
-# JLCPCBPlugin().register()
-# # except Exception as e:
-# # LOGGER.debug(repr(e))

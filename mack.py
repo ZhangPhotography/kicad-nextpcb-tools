@@ -8,12 +8,6 @@ from fastapi import FastAPI
 
 
 def create_app() -> FastAPI:
-    """
-    实例化FastAPI
-    :return: fastapi 实例
-    :rtype: FastAPI
-    """
-    # 实例化
     return FastAPI()
 
 origins = [
@@ -46,20 +40,15 @@ async def root():
 @app.post("/edapluginsapi/v1/stock/search")
 async def search_stock(data: dict):
     try:
-        # 打印请求数据
         print("Received POST request data:", data)
-
-        # 从请求数据中获取关键信息
         keyword = data.get("keyword")
         limit = data.get("limit")
         page = data.get("page")
         supplier = data.get("supplier")
         supplierSort = data.get("supplierSort")
-
-        # 构建与上文代码相匹配的响应数据结构
         response = {
             "result": {
-                "total": 100,  # 根据实际情况修改
+                "total": 100,  
                 "stockList": [
                     {
                         "categoryId": 1380,
@@ -120,9 +109,7 @@ async def search_stock(data: dict):
 
         return response
     except Exception as e:
-        # 捕获异常并记录日志
         logger.error(f"An errred: {str(e)}")
-        # 返回适当的错误响应
         # raise HTTPException(status_code=500, detail="Internal Server Error")
 
 if __name__ == '__main__':
