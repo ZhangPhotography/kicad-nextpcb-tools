@@ -3,11 +3,13 @@ import wx
 import requests
 import threading
 import json
-import math
 from .events import AssignPartsEvent, UpdateSetting
 from .helpers import HighResWxSize, loadBitmapScaled
 from .partdetails import PartDetailsDialog
 from requests.exceptions import Timeout
+
+def ceil(x, y):
+    return -(-x // y)
 
 class PartSelectorDialog(wx.Dialog):
     def __init__(self, parent, parts):
@@ -420,6 +422,7 @@ class PartSelectorDialog(wx.Dialog):
         ]:
             if word:
                 search_keyword += str(word + " ")
+                
         if self.current_page == 0:
             self.current_page = 1 
         body = {
@@ -494,7 +497,7 @@ class PartSelectorDialog(wx.Dialog):
         if self.search_part_list is None:
             return
         
-        self.total_pages =  math.ceil(self.total_num / 100)
+        self.total_pages = ceil(self.total_num, 100)
         self.update_page_label()
         self.result_count.SetLabel(f"{self.total_num} Results")
         if self.total_num >= 1000:
