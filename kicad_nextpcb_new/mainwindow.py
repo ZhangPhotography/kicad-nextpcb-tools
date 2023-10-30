@@ -285,8 +285,8 @@ class NextPCBTools(wx.Dialog):
                            self.on_notebook_page_changed)
 
         table_sizer.Add(self.notebook, 20, wx.EXPAND | wx.ALL, 5)
-        table_sizer.Add(self.down_toolbar, 1, wx.ALL | wx.EXPAND, 5)
-        # table_sizer.Add(self.match_part_view, 1, wx.ALL | wx.EXPAND, 5)
+        # table_sizer.Add(self.down_toolbar, 1, wx.ALL | wx.EXPAND, 5)
+        table_sizer.Add(self.match_part_view, 1, wx.ALL | wx.EXPAND, 5)
 
 
         self.Bind(
