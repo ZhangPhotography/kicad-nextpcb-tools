@@ -11,7 +11,6 @@ from view.ui_part_details_panel.part_details_view import PartDetailsView
 def ceil(x, y):
     return -(-x // y)
 
-
 class PartSelectorDialog(wx.Dialog):
     def __init__(self, parent, parts):
         wx.SizerFlags.DisableConsistencyChecks()
